@@ -7,6 +7,7 @@ from django.contrib.auth import login
 from django.contrib.auth import logout
 
 from .forms import RegisterForm
+from django.contrib.auth.models import User
 
 def index(request):
     return render(request, 'index.html', {
@@ -47,7 +48,22 @@ def logout_view(request):
 
 
 def register(request):
-    form = RegisterForm()
+    form = RegisterForm(request.POST or None)
+    
+    if request.method == 'POST' and form.is_valid():
+        # Obtain information from form
+        # username = form.cleaned_data.get('username') # Dictionary
+        # email = form.cleaned_data.get('email')
+        # password = form.cleaned_data.get('password')
+        
+        # Create a user without administrator permissions
+        # user = User.objects.create_user(username, email, password)
+        user = form.save()
+        if user:
+            login(request, user) # Creando la sesión
+            messages.success(request, 'Usuario creado exitosamente')
+            return redirect('index')
+        
     return render(request, 'users/register.html', {
         'form': form
     })
